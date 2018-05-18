@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+"""
+Padding Size Check GUI
+Created on Fri May 18 12:31:40 2018
+
+@author: Hao J.
+
+"""
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import messagebox
+import math
+
+class InputWindow:
+    def __init__(self):
+        self.frame = Tk()
+        self.frame.title("Size After Padding")
+        self.frame.geometry('280x200')
+        
+        self.label_case = Label(self.frame,text="case").grid(row=0,column=0)
+        
+        self.label_in_height = Label(self.frame, text="Input height:").grid(row=1,column=0)
+        self.label_in_width = Label(self.frame, text="Input width:").grid(row=2,column=0)
+        self.label_strides_height = Label(self.frame, text="strides height:").grid(row=3,column=0)
+        self.label_strides_width = Label(self.frame, text="strides width:").grid(row=4,column=0)
+        self.label_filter_height = Label(self.frame, text="filter height:").grid(row=5,column=0)
+        self.label_filter_width = Label(self.frame, text="filter width:").grid(row=6,column=0)
+        
+        self.case = Combobox(self.frame)
+        self.case['value'] = ("valid", "same")
+        self.case.current(1) # set the selected item
+        self.case.grid(row=0,column=1)
+        
+        self.in_height = Entry(self.frame, width = 25)
+        self.in_height.grid(row=1,column=1)
+        self.in_width = Entry(self.frame, width = 25)
+        self.in_width.grid(row=2,column=1)
+        self.strides_height = Entry(self.frame, width = 25)
+        self.strides_height.grid(row=3,column=1)
+        self.strides_width = Entry(self.frame, width = 25)
+        self.strides_width.grid(row=4,column=1)
+        self.filter_height = Entry(self.frame, width = 25)
+        self.filter_height.grid(row=5,column=1)
+        self.filter_width = Entry(self.frame, width = 25)
+        self.filter_width.grid(row=6,column=1)
+        
+        self.button_submit = Button(self.frame, text="Submit", width=10, command=self.clicked)
+        self.button_submit.grid(row=7,column=1)
+      
+        self.frame.mainloop()
+    
+    def clicked(self):
+        
+        if(self.case.get() == "same"):
+            out_height = math.ceil(int(self.in_height.get()) / int(self.strides_height.get()))
+            out_width = math.ceil(int(self.in_width.get()) / int(self.strides_width.get()))
+            pad_height = max((out_height-1)*int(self.strides_height.get()) + int(self.filter_height.get()) - int(self.in_height.get()), 0)
+            pad_width = max((out_width - 1)*int(self.strides_width.get()) + int(self.filter_width.get()) - int(self.in_width.get()), 0)
+            pad_top = math.floor(pad_height / 2)
+            pad_bottom = pad_height - pad_top
+            pad_left = math.floor(pad_width / 2)
+            pad_right = pad_width - pad_left
+            content = 'output height:  '+ str(out_height)+'   \n'+'output width:  '+str(out_width)+'   \n'+'pad_top:  '+ str(pad_top)+'   \n'+'pad_bottom:  '+ str(pad_bottom)+'   \n'+'pad_left:  '+str(pad_left)+'   \n'+'pad_right:  '+str(pad_right)+'   \n'
+            messagebox.showinfo('Output Results: ', content)
+        elif(self.case.get() == "valid"):
+            out_width = math.ceil((int(self.in_width)-int(self.filter_width)+1)/int(self.strides_width))
+            out_height = math.ceil((int(self.in_height)-int(self.filter_height)+1)/int(self.strides_height))
+            content = 'output height:  '+str(out_height)+'output width:  '+ str(out_width)       
+            messagebox.showinfo('Output Results: ', content)
+    
+            
+frame = InputWindow()
