@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May 19 00:14:58 2018
+
+@author: Hao J.
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import ndimage
+
+from skimage import *
+import os
+
+def load_images(folder):
+    img_list = []
+    for filename in os.listdir(folder):
+        img =  io.imread(os.path.join(folder, filename))
+        if img is not None:
+            img_list.append(img)
+    
+    return img_list
+#name = 'sample'
+#im = io.imread(name+'.bmp')
+        
+        
+def extract_object_for_single_image(im, save_dir, refer_index):
+    #im: rgb image
+    #refer_index: integer, used to name the extracted objects
+
+    im_grey = color.rgb2grey(im)
+    edges = filters.roberts(im_grey)
+    pix_row_sum =[sum(row) for row in edges]
+    
+    condition = 3
+    index = [i for i,x in enumerate(pix_row_sum) if x < condition]
+    #for i in index:
+    #    pix_row_sum[i] = 0
+    
+    if index[0] == 0:
+        status = 'wait'
+    else:
+        status = 'Ready for cut'
+        start_point = 0
+        
+    count = 1;    
+    for i in index[1:-1]:
+        if status=='Ready for cut':
+            img = im[start_point:i,:,:]
+            io.imsave(save_dir+str(refer_index)+'_'+str(count)+'.jpg', img)
+            count += 1
+            status = 'wait'
+            start_point = i
+        elif pix_row_sum[i+1]>=condition:
+            status = 'Ready for cut'
+            start_point = i
+
+folder = 'chopstick_data/'    
+save_dir = 'data/'
+img_list = load_images(folder)
+for count, im in enumerate(img_list):
+    extract_object_for_single_image(im, save_dir, count)
